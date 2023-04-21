@@ -1,5 +1,7 @@
 //! `style` contains the primitives used to control how your user interface will look.
 
+use std::str::FromStr;
+
 use bitflags::bitflags;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -24,6 +26,36 @@ pub enum Color {
     White,
     Rgb(u8, u8, u8),
     Indexed(u8),
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub struct ParseColorError;
+
+impl FromStr for Color {
+    type Err = ParseColorError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "reset" => Ok(Color::Reset),
+            "black" => Ok(Color::Black),
+            "red" => Ok(Color::Red),
+            "green" => Ok(Color::Green),
+            "yellow" => Ok(Color::Yellow),
+            "blue" => Ok(Color::Blue),
+            "magenta" => Ok(Color::Magenta),
+            "cyan" => Ok(Color::Cyan),
+            "gray" => Ok(Color::Gray),
+            "darkgray" | "dark gray" => Ok(Color::DarkGray),
+            "lightred" | "light red" => Ok(Color::LightRed),
+            "lightgreen" | "light green" => Ok(Color::LightGreen),
+            "lightyellow" | "light yellow" => Ok(Color::LightYellow),
+            "lightblue" | "light blue" => Ok(Color::LightBlue),
+            "lightmagenta" | "light magenta" => Ok(Color::LightMagenta),
+            "lightcyan" | "light cyan" => Ok(Color::LightCyan),
+            "white" => Ok(Color::White),
+            _ => Err(ParseColorError),
+        }
+    }
 }
 
 bitflags! {
@@ -310,5 +342,13 @@ mod tests {
             assert!(style.add_modifier.contains(*m));
             assert!(!style.sub_modifier.contains(*m));
         }
+    }
+
+    #[test]
+    fn parse_color_from_str() {
+        assert_eq!(Color::from_str("black"), Ok(Color::Black));
+        assert_eq!("white".parse::<Color>(), Ok(Color::White));
+
+        assert_eq!(Color::from_str("989D45"), Ok(Color::Rgb(152, 157, 69)));
     }
 }
